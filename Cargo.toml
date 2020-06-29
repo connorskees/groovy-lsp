@@ -1,10 +1,14 @@
 [package]
 name = "groovy-lsp"
 version = "0.0.0"
+description = "An implementation of the Microsoft Language Server Protocol for Groovy"
+readme = "README.md"
+license = "MIT"
+keywords = ["Groovy", "JVM", "LSP"]
+repository = "https://github.com/connorskees/groovy-lsp"
 authors = ["ConnorSkees <39542938+ConnorSkees@users.noreply.github.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+include = ["src", "Cargo.toml", "README.md"]
 
 [dependencies]
 salsa = "0.14.1"
