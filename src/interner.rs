@@ -119,12 +119,30 @@ macro_rules! declare_keywords {(
     pub mod keywords {
         use crate::ast;
         #[derive(Clone, Copy, PartialEq, Eq)]
+        pub enum Keywords {
+            $(
+                $konst,
+            )*
+        }
+
+        impl PartialEq<ast::Identifier> for Keywords {
+            fn eq(&self, other: &ast::Identifier) -> bool {
+                match self {
+                    $(
+                        Self::$konst => $index == other.name.as_u32(),
+                    )*
+                }
+            }
+        }
+
         pub struct Keyword {
             ident: ast::Identifier,
         }
+
         impl Keyword {
             #[inline] pub fn ident(self) -> ast::Identifier { self.ident }
         }
+
         $(
             #[allow(non_upper_case_globals)]
             pub const $konst: Keyword = Keyword {

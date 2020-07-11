@@ -304,6 +304,9 @@ pub enum Token<'a> {
 
     /// <>
     Diamond,
+
+    /// @
+    AtSign,
 }
 
 pub enum Literal<'a> {
@@ -333,4 +336,26 @@ impl Identifier {
             name: Symbol::intern(s),
         }
     }
+}
+
+pub enum Visibility {
+    PackagePrivate,
+    Private,
+    Protected,
+    Undefined,
+    Public,
+}
+
+pub enum ClassModifier {
+    Final,
+    Static,
+}
+
+pub enum MethodModifier {
+    Final,
+    Static,
+    Abstract,
+    Transient,
+    Synchronized,
+    Volatile,
 }
