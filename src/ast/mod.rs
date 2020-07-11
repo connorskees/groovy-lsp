@@ -57,7 +57,7 @@ pub enum Expr {
 pub enum Stmt {
     Assert,
     Block,
-    Break,
+    Break { label: Option<String> },
     Case,
     Catch,
     Continue,
