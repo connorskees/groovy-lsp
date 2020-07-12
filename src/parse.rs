@@ -84,6 +84,12 @@ impl<'a> GroovyParser<'a> {
         visibility: Visibility,
         modifiers: Vec<ClassModifier>,
     ) -> GResult<AstNode> {
+        let name = if let Some(Token::Identifier(ident)) = self.lexer.next() {
+            ident
+        } else {
+            return Err(GroovyError::new());
+        };
+
         todo!()
     }
 
