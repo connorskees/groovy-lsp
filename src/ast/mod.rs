@@ -4,6 +4,7 @@ mod integer;
 use crate::interner::Symbol;
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum AstNode {
     Annotated,
     ClassCodeVisitorSupport,
@@ -18,6 +19,7 @@ pub enum AstNode {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum Expr {
     Array,
     Attribute,
@@ -54,6 +56,7 @@ pub enum Expr {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum Stmt {
     Assert,
     Block,
@@ -74,6 +77,7 @@ pub enum Stmt {
     While,
 }
 
+#[derive(Debug)]
 pub enum BinaryOperator {
     /// +
     Add,
@@ -152,6 +156,7 @@ pub enum BinaryOperator {
     BitwiseNotAssign,
 }
 
+#[derive(Debug)]
 pub enum UnaryOperator {
     /// !
     LogicalNot,
@@ -159,6 +164,7 @@ pub enum UnaryOperator {
     BitwiseNot,
 }
 
+#[derive(Debug)]
 pub enum Token<'a> {
     Literal(Literal<'a>),
     Identifier(Identifier),
@@ -309,23 +315,26 @@ pub enum Token<'a> {
     AtSign,
 }
 
+#[derive(Debug)]
 pub enum Literal<'a> {
     String(StringLiteral<'a>),
     Number(&'a str),
 }
 
+#[derive(Debug)]
 pub enum StringLiteral<'a> {
     Uninterpolated(&'a str),
     Interpolated(Vec<InterpolatedStringPart<'a>>),
 }
 
+#[derive(Debug)]
 pub enum InterpolatedStringPart<'a> {
     Literal(&'a str),
     Identifier(Identifier),
     Expression(Vec<Token<'a>>),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Identifier {
     pub name: Symbol,
 }
@@ -338,6 +347,7 @@ impl Identifier {
     }
 }
 
+#[derive(Debug)]
 pub enum Visibility {
     PackagePrivate,
     Private,
@@ -346,11 +356,13 @@ pub enum Visibility {
     Public,
 }
 
+#[derive(Debug)]
 pub enum ClassModifier {
     Final,
     Static,
 }
 
+#[derive(Debug)]
 pub enum MethodModifier {
     Final,
     Static,
