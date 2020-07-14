@@ -287,7 +287,7 @@ pub enum UnaryOperator {
     BitwiseNot,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token<'a> {
     Literal(Literal<'a>),
     Identifier(Identifier),
@@ -438,19 +438,19 @@ pub enum Token<'a> {
     AtSign,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Literal<'a> {
     String(StringLiteral<'a>),
     Number(&'a str),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum StringLiteral<'a> {
     Uninterpolated(&'a str),
     Interpolated(Vec<InterpolatedStringPart<'a>>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum InterpolatedStringPart<'a> {
     Literal(&'a str),
     Identifier(Identifier),

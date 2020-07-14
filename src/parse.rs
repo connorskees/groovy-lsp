@@ -90,6 +90,8 @@ impl<'a> GroovyParser<'a> {
             return Err(GroovyError::new());
         };
 
+        self.expect_token(Token::CurlyBraceOpen)?;
+
         todo!()
     }
 
@@ -108,5 +110,12 @@ impl<'a> GroovyParser<'a> {
             }
         }
         Err(GroovyError::new())
+    }
+
+    fn expect_token(&mut self, tok: Token) -> GResult<()> {
+        if Some(tok) != self.lexer.next() {
+            return Err(GroovyError::new());
+        }
+        Ok(())
     }
 }
