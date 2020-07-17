@@ -14,9 +14,7 @@
 //!
 //! Borrowed from rustc
 
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::fmt;
+use std::{cell::RefCell, collections::HashMap, convert::TryFrom, fmt};
 
 /// A symbol is an interned or gensymed string.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -118,19 +116,22 @@ macro_rules! declare_keywords {(
 ) => {
     pub mod keywords {
         use crate::ast;
-        #[derive(Clone, Copy, PartialEq, Eq)]
+        use std::convert::TryFrom;
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum Keywords {
             $(
                 $konst,
             )*
         }
 
-        impl PartialEq<ast::Identifier> for Keywords {
-            fn eq(&self, other: &ast::Identifier) -> bool {
-                match self {
+        impl TryFrom<ast::Identifier> for Keywords {
+            type Error = ast::Identifier;
+            fn try_from(value: ast::Identifier) -> Result<Self, Self::Error> {
+                match value.name.0 {
                     $(
-                        Self::$konst => $index == other.name.as_u32(),
+                        $index => Ok(Self::$konst),
                     )*
+                    _ => Err(value)
                 }
             }
         }
@@ -224,7 +225,7 @@ declare_keywords! {
     (54, Try,          "try")
     (55, Void,         "void")
     (56, Volatile,     "volatile")
-    (56, While,        "while")
+    (57, While,        "while")
 }
 
 // If an interner exists in TLS, return it. Otherwise, prepare a fresh one.

@@ -3,33 +3,33 @@ use std::{collections::HashMap, rc::Rc};
 mod decimal;
 mod integer;
 
-use crate::interner::Symbol;
+use crate::interner::{keywords::Keywords, Symbol};
 
 #[derive(Debug)]
 pub struct Class {
-    name: Identifier,
-    visibility: Visibility,
-    modifiers: Vec<ClassModifier>,
-    super_class: Option<Rc<Class>>,
-    methods: Vec<Method>,
-    fields: Vec<Field>,
-    properties: Vec<Property>,
-    interfaces: Vec<Class>,
-    mixin: Vec<Mixin>,
+    pub name: Identifier,
+    pub visibility: Visibility,
+    pub modifiers: Vec<ClassModifier>,
+    pub super_class: Option<Rc<Class>>,
+    pub methods: Vec<Method>,
+    pub fields: Vec<Field>,
+    pub properties: Vec<Property>,
+    pub interfaces: Vec<Class>,
+    pub mixin: Vec<Mixin>,
 }
 
 #[derive(Debug)]
 pub struct Method {
-    name: Identifier,
-    visibility: Visibility,
-    modifiers: Vec<MethodModifier>,
-    return_type: Class,
-    parameters: Vec<Parameter>,
-    has_default_value: bool,
-    exceptions: Vec<Class>,
-    static_constructor: bool,
-    body: Stmt,
-    is_constructor: bool,
+    pub name: Identifier,
+    pub visibility: Visibility,
+    pub modifiers: Vec<MethodModifier>,
+    pub return_type: Type,
+    pub parameters: Vec<Parameter>,
+    pub has_default_value: bool,
+    pub exceptions: Vec<Class>,
+    pub static_constructor: bool,
+    pub body: Stmt,
+    pub is_constructor: bool,
 }
 
 #[derive(Debug)]
@@ -37,11 +37,11 @@ pub struct Field {
     name: Identifier,
     visibility: Visibility,
     modifiers: Vec<MethodModifier>,
-    field_type: Class,
+    field_type: Type,
     owner: Class,
     dynamically_typed: bool,
     holder: bool,
-    origin_type: Class,
+    origin_type: Option<Type>,
     initial_value: Expr,
 }
 
@@ -61,19 +61,19 @@ pub struct Mixin {}
 
 #[derive(Debug)]
 pub struct Parameter {
-    param_type: Class,
-    name: Identifier,
-    origin_type: Class,
-    dynamically_typed: bool,
-    closure_shared: bool,
-    default_value: Option<Expr>,
-    in_static_context: bool,
-    modifiers: Vec<MethodModifier>,
+    pub param_type: Type,
+    pub name: Identifier,
+    pub origin_type: Option<Type>,
+    pub dynamically_typed: bool,
+    pub closure_shared: bool,
+    pub default_value: Option<Expr>,
+    pub in_static_context: bool,
+    pub modifiers: Vec<MethodModifier>,
 }
 
 #[derive(Debug)]
 pub struct Import {
-    import_type: Class,
+    import_type: Type,
     alias: Identifier,
     field_name: Identifier,
     package_name: Identifier,
@@ -100,7 +100,7 @@ pub enum Expr {
     Array {
         values: Vec<Expr>,
         length: Box<Expr>,
-        element_type: Class,
+        element_type: Type,
     },
     Attribute,
     Binary,
@@ -140,7 +140,7 @@ pub enum Expr {
         accessed_variable: Variable,
         closure_share: bool,
         use_ref: bool,
-        origin_type: Class,
+        origin_type: Option<Type>,
     },
 }
 
@@ -149,7 +149,7 @@ pub struct Variable {}
 
 #[derive(Debug)]
 pub struct VariableScope {
-    parent: Box<VariableScope>,
+    parent: Option<Box<VariableScope>>,
     class_scope: Box<VariableScope>,
     in_static_context: bool,
     declared_variables: HashMap<Identifier, Variable>,
@@ -168,7 +168,8 @@ pub enum Stmt {
     },
     Block {
         body: Vec<Stmt>,
-        scope: VariableScope,
+        // todo: this shouldn't be optional
+        scope: Option<VariableScope>,
     },
     Break {
         label: Option<Identifier>,
@@ -291,6 +292,8 @@ pub enum UnaryOperator {
 pub enum Token<'a> {
     Literal(Literal<'a>),
     Identifier(Identifier),
+
+    Keyword(Keywords),
     /// (
     ParenOpen,
     /// )
@@ -387,6 +390,9 @@ pub enum Token<'a> {
     /// ~=
     BitwiseNotAssign,
 
+    /// ,
+    Comma,
+
     // TODO: lex everything beyond this point
     /// <<<
     UnsignedShl,
@@ -479,13 +485,13 @@ pub enum Visibility {
     Public,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ClassModifier {
     Final,
     Static,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MethodModifier {
     Final,
     Static,
@@ -493,4 +499,10 @@ pub enum MethodModifier {
     Transient,
     Synchronized,
     Volatile,
+}
+
+#[derive(Debug)]
+pub enum Type {
+    /// Exists just to get things to compile
+    Placeholder,
 }

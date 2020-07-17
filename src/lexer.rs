@@ -1,4 +1,9 @@
-use crate::ast::{Identifier, Literal, Token};
+use std::convert::TryFrom;
+
+use crate::{
+    ast::{Identifier, Literal, Token},
+    interner::keywords::Keywords,
+};
 
 // todo: we must store the last token in order to resolve ambiguities with
 // `/` (is it a slashy-regex string or division?)
@@ -52,6 +57,7 @@ impl<'a> GroovyLexer<'a> {
             Some('}') => Token::CurlyBraceClose,
             Some('[') => Token::SquareBraceOpen,
             Some(']') => Token::SquareBraceClose,
+            Some(',') => Token::Comma,
             Some('\'') => todo!(),
             Some('"') => todo!(),
             Some('?') => todo!(),
@@ -94,7 +100,10 @@ impl<'a> GroovyLexer<'a> {
             self.next_char();
         }
 
-        Token::Identifier(Identifier::new(&self.input[self.start..self.pos]))
+        match Keywords::try_from(Identifier::new(&self.input[self.start..self.pos])) {
+            Ok(keyword) => Token::Keyword(keyword),
+            Err(ident) => Token::Identifier(ident),
+        }
     }
 
     fn lex_plus(&mut self) -> Token<'a> {
