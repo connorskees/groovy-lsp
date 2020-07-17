@@ -2,8 +2,8 @@ use std::{convert::TryFrom, iter::Peekable};
 
 use crate::{
     ast::{
-        AstNode, BinaryOperator, Class, ClassModifier, Identifier, Literal, Method, MethodModifier,
-        Parameter, Stmt, Token, Type, Visibility,
+        AstNode, BinaryOperator, Class, ClassModifier, Expr, Identifier, Literal, Method,
+        MethodModifier, Parameter, Stmt, Token, Type, Visibility,
     },
     interner::keywords::Keywords,
     lexer::GroovyLexer,
@@ -146,7 +146,7 @@ impl<'a> GroovyParser<'a> {
         loop {
             let visibility = self.parse_visibility();
             let modifiers = self.parse_method_modifiers();
-            let type_name = self.parse_type_name()?;
+            let type_name = self.parse_type()?;
             let ident = self.expect_identifier()?;
             match self.lexer.peek() {
                 Some(Token::ParenOpen) => methods
@@ -175,15 +175,6 @@ impl<'a> GroovyParser<'a> {
             interfaces: Vec::new(),
             mixin: Vec::new(),
         })
-    }
-
-    fn parse_type_name(&mut self) -> GResult<Type> {
-        match self.lexer.next() {
-            Some(Token::Identifier(..)) => {}
-            Some(Token::Keyword(..)) => {}
-            _ => return Err(GroovyError::new("expected type name")),
-        }
-        Ok(Type::Placeholder)
     }
 
     fn parse_method_declaration(
@@ -216,7 +207,7 @@ impl<'a> GroovyParser<'a> {
         let mut params = Vec::new();
 
         loop {
-            let param_type = self.parse_type_name()?;
+            let param_type = self.parse_type()?;
             let name = self.expect_identifier()?;
             if let Some(Token::SquareBraceOpen) = self.lexer.peek() {
                 self.lexer.next();
@@ -254,10 +245,6 @@ impl<'a> GroovyParser<'a> {
         Ok(params)
     }
 
-    fn parse_variable_declaration(&mut self) -> GResult<AstNode> {
-        todo!()
-    }
-
     fn expect_keyword(&mut self, k: Keywords) -> GResult<()> {
         if Some(Token::Keyword(k)) == self.lexer.next() {
             return Ok(());
@@ -281,24 +268,61 @@ impl<'a> GroovyParser<'a> {
 }
 
 impl GroovyParser<'_> {
+    fn parse_type(&mut self) -> GResult<Type> {
+        let initial_type = match self.lexer.peek() {
+            Some(Token::Keyword(Keywords::Void)) => Type::Void,
+            Some(Token::Keyword(Keywords::Int)) => Type::Int,
+            Some(Token::Keyword(Keywords::Double)) => Type::Double,
+            Some(Token::Keyword(Keywords::Float)) => Type::Float,
+            Some(Token::Keyword(Keywords::Short)) => Type::Short,
+            Some(Token::Keyword(Keywords::Char)) => Type::Char,
+            Some(Token::Keyword(Keywords::Boolean)) => Type::Boolean,
+            Some(Token::Keyword(Keywords::Byte)) => Type::Byte,
+            Some(Token::Keyword(Keywords::Long)) => Type::Long,
+            Some(Token::Identifier(ident)) => Type::Class(*ident),
+            _ => return Err(GroovyError::new("expected type")),
+        };
+        self.lexer.next();
+        if let Some(Token::SquareBraceOpen) = self.lexer.peek() {
+            self.lexer.next();
+            todo!("array type")
+        }
+        Ok(initial_type)
+    }
+}
+
+impl GroovyParser<'_> {
+    fn parse_expr(&mut self) -> GResult<Expr> {
+        todo!()
+    }
+}
+
+impl GroovyParser<'_> {
     fn parse_stmt(&mut self) -> GResult<Stmt> {
         match self.lexer.peek() {
             Some(Token::CurlyBraceOpen) => self.parse_block(),
-            Some(Token::Keyword(Keywords::Assert)) => todo!(),
-            Some(Token::Keyword(Keywords::Break)) => todo!(),
-            Some(Token::Keyword(Keywords::Class)) => todo!(),
-            Some(Token::Keyword(Keywords::Continue)) => todo!(),
-            Some(Token::Keyword(Keywords::Return)) => todo!(),
-            Some(Token::Keyword(Keywords::Throw)) => todo!(),
-            Some(Token::Keyword(Keywords::Try)) => todo!(),
-            Some(Token::Keyword(Keywords::For)) => todo!(),
-            Some(Token::Keyword(Keywords::Do)) => todo!(),
-            Some(Token::Keyword(Keywords::While)) => todo!(),
-            Some(Token::Keyword(Keywords::Switch)) => todo!(),
-            Some(Token::Keyword(Keywords::Synchronized)) => todo!(),
-            Some(Token::Keyword(Keywords::If)) => todo!(),
-            Some(Token::Identifier(..)) => todo!(),
-            _ => todo!(),
+            Some(Token::Keyword(Keywords::Assert)) => todo!("assert stmt"),
+            Some(Token::Keyword(Keywords::Break)) => todo!("break stmt"),
+            Some(Token::Keyword(Keywords::Class)) => todo!("class stmt"),
+            Some(Token::Keyword(Keywords::Continue)) => todo!("continue stmt"),
+            Some(Token::Keyword(Keywords::Return)) => todo!("return stmt"),
+            Some(Token::Keyword(Keywords::Throw)) => todo!("throw stmt"),
+            Some(Token::Keyword(Keywords::Try)) => todo!("try stmt"),
+            Some(Token::Keyword(Keywords::For)) => todo!("for stmt"),
+            Some(Token::Keyword(Keywords::Do)) => todo!("do .. while stmt"),
+            Some(Token::Keyword(Keywords::While)) => todo!("while stmt"),
+            Some(Token::Keyword(Keywords::Switch)) => todo!("switch stmt"),
+            Some(Token::Keyword(Keywords::Synchronized)) => todo!("synchronized stmt"),
+            Some(Token::Keyword(Keywords::If)) => todo!("if stmt"),
+            _ => {
+                if let Ok(type_name) = self.parse_type() {
+                    self.parse_variable_declaration(type_name)
+                } else if let Ok(expr) = self.parse_expr() {
+                    Ok(Stmt::Expression(expr))
+                } else {
+                    return Err(GroovyError::new("expected stmt"));
+                }
+            }
         }
     }
 
@@ -316,5 +340,12 @@ impl GroovyParser<'_> {
         }
 
         Ok(Stmt::Block { body, scope: None })
+    }
+
+    fn parse_variable_declaration(&mut self, type_name: Type) -> GResult<Stmt> {
+        let name = self.expect_identifier()?;
+        self.expect_token(Token::SingleEqual)?;
+        let value = self.parse_expr()?;
+        todo!()
     }
 }

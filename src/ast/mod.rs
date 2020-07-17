@@ -442,6 +442,20 @@ pub enum Token<'a> {
 
     /// @
     AtSign,
+
+    /// !in
+    NotIn,
+
+    /// !instanceof
+    NotInstanceOf,
+
+    /// \
+    IntegerDivision,
+
+    /// ++
+    PlusPlus,
+    /// --
+    MinusMinus,
 }
 
 #[derive(Debug, PartialEq)]
@@ -487,22 +501,43 @@ pub enum Visibility {
 
 #[derive(Debug, PartialEq)]
 pub enum ClassModifier {
+    /// Declaration cannot be overridden
     Final,
     Static,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum MethodModifier {
+    /// Declaration cannot be overridden
     Final,
     Static,
+    /// Body will be missing
     Abstract,
+    /// Property should not be persisted
     Transient,
     Synchronized,
+    /// Compiler should never cache property
     Volatile,
+    /// A native code entrypoint
+    Native,
 }
 
 #[derive(Debug)]
 pub enum Type {
-    /// Exists just to get things to compile
-    Placeholder,
+    /// void
+    Void,
+    /// bool
+    Boolean,
+    /// 1 byte integer
+    Byte,
+    /// 2 byte integer
+    Short,
+    ///
+    Int,
+    Double,
+    Float,
+    Char,
+    Long,
+    Class(Identifier),
+    Array(Box<Type>),
 }
