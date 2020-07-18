@@ -217,24 +217,17 @@ pub enum Token<'a> {
 
     /// --
     MinusMinus,
+
+    /// ${
+    /// The start of an interpolated block within a gstring
+    GStringInterpolationStart,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum Literal<'a> {
     String(&'a str),
-    GString(GString<'a>),
     Number(&'a str),
     True,
     False,
     Null,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct GString<'a>(Vec<InterpolatedStringPart<'a>>);
-
-#[derive(Debug, PartialEq)]
-pub enum InterpolatedStringPart<'a> {
-    Literal(&'a str),
-    Identifier(Identifier),
-    Expression(Vec<Token<'a>>),
 }

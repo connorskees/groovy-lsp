@@ -61,7 +61,7 @@ pub enum Expr {
         field: Box<Field>,
         use_ref: bool,
     },
-    GString,
+    GString(GString),
     /// A lambda expression, taking the form of
     ///  - x -> x * 2
     ///  - (x, y) -> x + y
@@ -115,7 +115,7 @@ pub enum Expr {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ConstExpr {
     True,
     False,
@@ -129,4 +129,14 @@ pub enum ConstExpr {
 pub struct MapEntry {
     key: Box<Expr>,
     value: Box<Expr>,
+}
+
+#[derive(Debug)]
+pub struct GString(Vec<InterpolatedStringPart>);
+
+#[derive(Debug)]
+pub enum InterpolatedStringPart {
+    Literal(String),
+    Identifier(Identifier),
+    Expression(Box<Expr>),
 }
