@@ -223,9 +223,10 @@ declare_keywords! {
     (52, Transient,    "transient")
     (53, True,         "true")
     (54, Try,          "try")
-    (55, Void,         "void")
-    (56, Volatile,     "volatile")
-    (57, While,        "while")
+    (55, Var,          "var")
+    (56, Void,         "void")
+    (57, Volatile,     "volatile")
+    (58, While,        "while")
 }
 
 // If an interner exists in TLS, return it. Otherwise, prepare a fresh one.

@@ -160,4 +160,6 @@ pub enum Type {
     Long,
     Class(Identifier),
     Array(Box<Type>),
+    /// Either inferred or dynamic
+    Placeholder,
 }

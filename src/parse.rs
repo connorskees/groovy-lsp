@@ -309,11 +309,23 @@ impl GroovyParser<'_> {
     fn parse_stmt(&mut self) -> GResult<Stmt> {
         match self.lexer.peek() {
             Some(Token::CurlyBraceOpen) => self.parse_block(),
-            Some(Token::Keyword(Keywords::Assert)) => todo!("assert stmt"),
+            Some(Token::Keyword(Keywords::Assert)) => {
+                let bool_expr = self.parse_expr()?;
+                let message = if let Some(Token::Comma) = self.lexer.peek() {
+                    self.lexer.next();
+                    Some(self.parse_expr()?)
+                } else {
+                    None
+                };
+                Ok(Stmt::Assert { bool_expr, message })
+            }
             Some(Token::Keyword(Keywords::Break)) => todo!("break stmt"),
             Some(Token::Keyword(Keywords::Class)) => todo!("class stmt"),
             Some(Token::Keyword(Keywords::Continue)) => todo!("continue stmt"),
-            Some(Token::Keyword(Keywords::Return)) => todo!("return stmt"),
+            Some(Token::Keyword(Keywords::Return)) => {
+                let expr = self.parse_expr()?;
+                Ok(Stmt::Return { expr })
+            }
             Some(Token::Keyword(Keywords::Throw)) => todo!("throw stmt"),
             Some(Token::Keyword(Keywords::Try)) => todo!("try stmt"),
             Some(Token::Keyword(Keywords::For)) => todo!("for stmt"),
@@ -322,6 +334,25 @@ impl GroovyParser<'_> {
             Some(Token::Keyword(Keywords::Switch)) => todo!("switch stmt"),
             Some(Token::Keyword(Keywords::Synchronized)) => todo!("synchronized stmt"),
             Some(Token::Keyword(Keywords::If)) => todo!("if stmt"),
+            Some(Token::Keyword(Keywords::Def | Keywords::Var)) => {
+                self.lexer.next();
+                let name = self.expect_identifier()?;
+                let value = if let Some(Token::SingleEqual) = self.lexer.peek() {
+                    self.lexer.next();
+                    self.parse_expr()?
+                } else {
+                    Expr::Constant(ConstExpr::Null)
+                };
+                Ok(Stmt::VariableDeclaration(Variable {
+                    name,
+                    value,
+                    is_closure_shared_variable: TODO_BOOL,
+                    is_dynamically_typed: true,
+                    in_static_context: TODO_BOOL,
+                    type_name: Type::Placeholder,
+                    modifiers: Vec::new(),
+                }))
+            }
             _ => {
                 if let Ok(type_name) = self.parse_type() {
                     self.parse_variable_declaration(type_name)

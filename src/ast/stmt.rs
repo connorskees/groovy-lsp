@@ -7,7 +7,7 @@ pub enum Stmt {
     /// E.g. `assert  1 == 0, "1 does not equal 0"`
     Assert {
         bool_expr: Expr,
-        message: Expr,
+        message: Option<Expr>,
     },
     Block {
         body: Vec<Stmt>,
@@ -32,7 +32,7 @@ pub enum Stmt {
     If {
         expr: Expr,
         if_block: Box<Stmt>,
-        else_block: Box<Stmt>,
+        else_block: Option<Box<Stmt>>,
     },
     Return {
         expr: Expr,
