@@ -293,15 +293,58 @@ impl GroovyParser<'_> {
 
 impl GroovyParser<'_> {
     fn parse_expr(&mut self) -> GResult<Expr> {
-        let expr = match self.lexer.next() {
+        self.parse_bin_op(0)
+    }
+
+    fn parse_bin_op(&mut self, min_precendence: u8) -> GResult<Expr> {
+        let mut lhs = self.parse_expr_atom()?;
+
+        loop {
+            let op = match self.lexer.peek() {
+                Some(Token::Add) => BinaryOperator::Add,
+                Some(Token::Sub) => BinaryOperator::Sub,
+                Some(Token::Mul) => BinaryOperator::Mul,
+                Some(Token::Div) => BinaryOperator::Div,
+                Some(Token::ExprEnd) => {
+                    self.lexer.next();
+                    break;
+                }
+                Some(..) | None => break,
+            };
+
+            let (lhs_precedence, rhs_precedence) = op.precendence();
+            if lhs_precedence < min_precendence {
+                break;
+            }
+
+            self.lexer.next();
+
+            let rhs = self.parse_bin_op(rhs_precedence)?;
+
+            lhs = Expr::BinaryOp {
+                left: Box::new(lhs),
+                op,
+                right: Box::new(rhs),
+                is_safe: TODO_BOOL,
+            };
+        }
+
+        Ok(lhs)
+    }
+
+    fn parse_expr_atom(&mut self) -> GResult<Expr> {
+        Ok(match self.lexer.next() {
             Some(Token::Literal(Literal::Number(number))) => {
                 Expr::Constant(ConstExpr::Number(number.to_owned()))
             }
             Some(Token::Literal(Literal::Null)) => Expr::Constant(ConstExpr::Null),
-            _ => todo!("unexpected token in expr"),
-        };
-        self.expect_token(Token::ExprEnd)?;
-        Ok(expr)
+            Some(Token::Literal(Literal::True)) => Expr::Constant(ConstExpr::True),
+            Some(Token::Literal(Literal::False)) => Expr::Constant(ConstExpr::False),
+            Some(Token::Literal(Literal::String(string))) => {
+                Expr::Constant(ConstExpr::String(string.to_owned()))
+            }
+            tok => todo!("unexpected token in expr: {:?}", tok),
+        })
     }
 }
 

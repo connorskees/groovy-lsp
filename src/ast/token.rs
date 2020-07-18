@@ -176,7 +176,7 @@ pub enum Token<'a> {
     /// ?.
     SafeNavigation,
 
-    /// @.
+    /// .@
     DirectFieldAccess,
 
     /// .&
@@ -186,7 +186,10 @@ pub enum Token<'a> {
     MethodReference,
 
     /// *.
-    Spread,
+    SpreadDot,
+
+    /// *:
+    SpreadMap,
 
     /// ..
     ExclusiveRange,
