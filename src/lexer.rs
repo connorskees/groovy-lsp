@@ -58,12 +58,13 @@ impl<'a> GroovyLexer<'a> {
             Some('[') => Token::SquareBraceOpen,
             Some(']') => Token::SquareBraceClose,
             Some(',') => Token::Comma,
-            Some('\'') => todo!(),
-            Some('"') => todo!(),
-            Some('?') => todo!(),
-            Some(':') => todo!(),
+            Some('\'') => todo!("lex single quote"),
+            Some('"') => todo!("lex double quote"),
+            Some('?') => todo!("lex question mark"),
+            Some(':') => todo!("lex colon"),
             Some('$') => todo!("could be start of identifier *or* string, `$/.../$`"),
-            _ => todo!(),
+            Some(';') => Token::ExprEnd,
+            c => todo!("lex {:?}", c),
         }
     }
 

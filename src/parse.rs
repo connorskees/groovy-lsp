@@ -2,8 +2,8 @@ use std::{convert::TryFrom, iter::Peekable};
 
 use crate::{
     ast::{
-        AstNode, BinaryOperator, Class, ClassModifier, Expr, Identifier, Literal, Method,
-        MethodModifier, Parameter, Stmt, Token, Type, Visibility,
+        AstNode, BinaryOperator, Class, ClassModifier, ConstExpr, Expr, Identifier, Literal,
+        Method, MethodModifier, Parameter, Stmt, Token, Type, Variable, Visibility,
     },
     interner::keywords::Keywords,
     lexer::GroovyLexer,
@@ -293,7 +293,15 @@ impl GroovyParser<'_> {
 
 impl GroovyParser<'_> {
     fn parse_expr(&mut self) -> GResult<Expr> {
-        todo!()
+        let expr = match self.lexer.next() {
+            Some(Token::Literal(Literal::Number(number))) => {
+                Expr::Constant(ConstExpr::Number(number.to_owned()))
+            }
+            Some(Token::Literal(Literal::Null)) => Expr::Constant(ConstExpr::Null),
+            _ => todo!("unexpected token in expr"),
+        };
+        self.expect_token(Token::ExprEnd)?;
+        Ok(expr)
     }
 }
 
@@ -346,6 +354,14 @@ impl GroovyParser<'_> {
         let name = self.expect_identifier()?;
         self.expect_token(Token::SingleEqual)?;
         let value = self.parse_expr()?;
-        todo!()
+        Ok(Stmt::VariableDeclaration(Variable {
+            name,
+            type_name,
+            value,
+            is_closure_shared_variable: TODO_BOOL,
+            in_static_context: TODO_BOOL,
+            is_dynamically_typed: TODO_BOOL,
+            modifiers: Vec::new(),
+        }))
     }
 }
